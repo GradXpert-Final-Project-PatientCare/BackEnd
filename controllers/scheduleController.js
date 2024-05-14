@@ -9,6 +9,14 @@ class ScheduleController {
     }
     try {
       let id = +req.params.id;
+      let doctor = await Doctor.findByPk(id);
+
+      if (!doctor) {
+        const error = new Error(`Doctor requested not found`);
+        error.status = 404;
+        return next(error);
+      }
+
       let schedules = await Schedule.findAll({
         where: {
           DoctorId: id,

@@ -38,10 +38,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         notEmpty:{
           msg:'Tidak boleh kosong'
-        },
-        isAfter:{
-          args: dayjs().add(1, 'day'),
-          msg:'Tanggal kurang dari hari ini'
         }
       }
     },

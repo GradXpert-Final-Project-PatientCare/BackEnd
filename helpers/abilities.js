@@ -1,4 +1,4 @@
-const { AbilityBuilder, PureAbility } = require('@casl/ability');
+const { AbilityBuilder, PureAbility } = require("@casl/ability");
 
 function defineAbilityFor(user) {
   if (user) {
@@ -11,37 +11,25 @@ function defineAbilityFor(user) {
 function defineRulesFor(user) {
   const builder = new AbilityBuilder(PureAbility);
 
-  switch (user.role) {
-    case 'admin':
-      defineAdminRules(builder);
-      break;
-    case 'doctor':
-      defineDoctorRules(builder);
-      break;
-    default:
-      defineUserRules(builder, user);
-      break;
+  if (user.role === "admin") {
+    defineAdminRules(builder);
+  } else {
+    defineUserRules(builder, user);
   }
 
   return builder.rules;
 }
 
 function defineAdminRules({ can }) {
-  can('manage', 'all');
-}
-
-function defineDoctorRules({ can }, user) {
-  can(['read', 'update'], 'Appointment');
-  can(['read'], 'Doctor');
-  can(['read', 'create', 'update', 'delete'], 'Schedule');
-  can(['read'], 'User');
+  can("manage", "all");
 }
 
 function defineUserRules({ can }, user) {
-  can(['read', 'create', 'update'], 'Appointment');
-  can(['read'], 'Doctor');
-  can(['read'], 'Schedule');
-  can(['read'], 'User');
+  can(["read", "create", "update"], "Appointment");
+  can(["read"], "Doctor");
+  can(["read"], "Schedule");
+  can(["read"], "Timeslot");
+  can(["read"], "User");
 }
 
 module.exports = {
