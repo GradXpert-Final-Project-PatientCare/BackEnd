@@ -1,26 +1,34 @@
 const { Doctor, User, Appointment } = require("../models");
 
 class AppointmentController {
-  static GetUserAppointment(req, res) {
-    let authenticatedUser = res.locals.user;
-
-    Appointment.findAll({
-      where: {
-        UserId: authenticatedUser.id,
-      },
-      include: [Doctor, User],
-    })
-      .then((result) => {
-        res.status(200).json(result);
+  static async GetUserAppointment(req, res) {
+    if (!req.ability.can('read', 'Doctor')) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
+    try {
+      let authenticatedUser = req.user;
+      let appointments = await Appointment.findAll({
+        where: {
+          UserId: authenticatedUser.id,
+        },
+        include: [Doctor, User],
       })
-      .catch((err) => {
-        res.status(500).json(err);
+
+      res.status(200).json({
+        status: 200,
+        message: "Successfully retrieve appointment list",
+        data: appointments,
       });
+    } catch (error) {
+      return next(error);
+    }
   }
 
   static async CreateAppointment(req, res) {
     try {
-      let UserId = res.locals.user.id;
+      let UserId = req.user.id;
       const { DoctorId, waktu, keterangan } = req.body;
 
       let result = await Appointment.create({
@@ -38,7 +46,7 @@ class AppointmentController {
 
   static async UpdateAppointmentById(req, res) {
     let id = +req.params.id;
-    let authenticatedUser = res.locals.user;
+    let authenticatedUser = req.user;
     const { waktu, keterangan } = req.body;
 
     try {
@@ -67,7 +75,7 @@ class AppointmentController {
 
   static async DeleteAppointmentByID(req, res) {
     let id = +req.params.id;
-    let authenticatedUser = res.locals.user;
+    let authenticatedUser = req.user;
 
     try {
       let getAppointment = await Appointment.findByPk(id);

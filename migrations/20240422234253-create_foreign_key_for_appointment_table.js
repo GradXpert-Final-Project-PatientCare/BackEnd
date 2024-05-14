@@ -31,6 +31,17 @@ module.exports = {
       onDelete: 'restrict',
       onUpdate: 'cascade'
     });
+    await queryInterface.addConstraint('Appointments', {
+      fields: ['TimeslotId'],
+      type: 'foreign key',
+      name: 'timeslot_fk',
+      references:{
+        table: 'Timeslots',
+        field: 'id'
+      },
+      onDelete: 'restrict',
+      onUpdate: 'cascade'
+    });
   },
 
   async down (queryInterface, Sequelize) {
@@ -42,5 +53,6 @@ module.exports = {
      */
     await queryInterface.removeConstraint('Appointments','user_fk');
     await queryInterface.removeConstraint('Appointments','doctor_fk');
+    await queryInterface.removeConstraint('Appointments','timeslot_fk');
   }
 };

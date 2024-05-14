@@ -1,29 +1,24 @@
-const router = require('express').Router();
-const UserController = require('../controllers/userController');
-const DoctorController = require('../controllers/doctorController');
-const AppointmentController = require('../controllers/appointmentController');
-const authentication = require('../middlewares/authentication');
+const router = require("express").Router();
+const userRouter = require("./userRouter");
+const doctorRouter = require("./doctorRouter");
+const appointmentRouter = require("./appointmentRouter");
+const scheduleRouter = require("./scheduleRouter");
+const errorHandler = require("../middlewares/error");
+const notFound = require("../middlewares/notFound");
 
-router.get('/', (req,res) => {
-    res.send('Hello World');
+// Test
+router.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
-router.post('/users/register', UserController.Register);
+// Routes
+router.use("/user", userRouter);
+router.use("/doctor", doctorRouter);
+router.use("/appointment", appointmentRouter);
+router.use("/schedule", scheduleRouter);
 
-router.post('/users/login', UserController.Login);
-
-router.get('/doctors', DoctorController.GetAllDoctors);
-
-router.get('/doctors/:id', DoctorController.GetDoctorByID);
-
-router.use(authentication);
-
-router.get('/myappointment', AppointmentController.GetUserAppointment);
-
-router.post('/appointments', AppointmentController.CreateAppointment);
-
-router.patch('/appointments/:id', AppointmentController.UpdateAppointmentById);
-
-router.delete('/appointments/:id', AppointmentController.DeleteAppointmentByID);
+// Error handler
+router.use(notFound);
+router.use(errorHandler);
 
 module.exports = router;

@@ -17,10 +17,59 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    username: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    phoneNumber: DataTypes.STRING
+    username: {
+      type:DataTypes.STRING,
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:'Tidak boleh null'
+        },
+        notEmpty:{
+          msg:'Tidak boleh kosong'
+        }
+        
+      }
+    },
+    email: {
+      type:DataTypes.STRING,
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:'Tidak boleh null'
+        },
+        notEmpty:{
+          msg:'Tidak boleh kosong'
+        },
+        isEmail:{
+          msg:'Format wajib email'
+        }
+      },
+      unique:{
+        msg:'Email sudah terdaftar'
+      }
+    },
+    password: {
+      type:DataTypes.STRING,
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:'Tidak boleh null'
+        },
+        notEmpty:{
+          msg:'Tidak boleh kosong'
+        },
+        minLength(val){
+          if (val.length < 5){
+            throw new Error ("Minimum 5 karakter")
+        }
+      }
+      }
+    },
+    phoneNumber: {
+      type:DataTypes.STRING,
+      allowNull:true,
+    },
+    role: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'User',
@@ -28,6 +77,7 @@ module.exports = (sequelize, DataTypes) => {
       beforeCreate: (user,opt) => {
         const hashedPassword = hashPassword(user.password);
         user.password = hashedPassword;
+        user.role = user.role ?? 'user';
       }
     }
   });

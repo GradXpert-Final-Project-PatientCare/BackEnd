@@ -17,18 +17,16 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
       },
-      waktu: {
+      TimeslotId: {
         allowNull: false,
-        validate: {
-          customValidator(value) {
-            if (new Date(value) < new Date()) {
-              throw new Error("invalid date");
-            }
-          },
-        },
-        type: Sequelize.DATE,
+        type: Sequelize.INTEGER,
+      },
+      status: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       keterangan: {
+        allowNull: true,
         type: Sequelize.TEXT,
       },
       createdAt: {

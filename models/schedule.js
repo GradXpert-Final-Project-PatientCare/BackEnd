@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Appointment extends Model {
+  class Schedule extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,25 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User);
+      this.hasMany(models.Timeslot)
       this.belongsTo(models.Doctor);
-      this.belongsTo(models.Timeslot);
     }
   }
-  Appointment.init(
+  Schedule.init(
     {
-      UserId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: "Tidak boleh null",
-          },
-          notEmpty: {
-            msg: "Tidak boleh kosong",
-          },
-        },
-      },
       DoctorId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -40,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      TimeslotId: {
+      kuota: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
@@ -50,9 +37,13 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: {
             msg: "Tidak boleh kosong",
           },
+          min: {
+            args: [0],
+            msg: "Minimum 0",
+          },
         },
       },
-      status: {
+      hari: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -63,20 +54,30 @@ module.exports = (sequelize, DataTypes) => {
             msg: "Tidak boleh kosong",
           },
           isIn: {
-            args: [["dipesan", "dibatalkan", "selesai"]],
+            args: [
+              ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"],
+            ],
             msg: "Status tidak tepat",
           },
         },
       },
-      keterangan: {
-        type: DataTypes.TEXT,
-        allowNull: true,
+      waktu: {
+        type: DataTypes.TIME,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Tidak boleh null",
+          },
+          notEmpty: {
+            msg: "Tidak boleh kosong",
+          },
+        },
       },
     },
     {
       sequelize,
-      modelName: "Appointment",
+      modelName: "Schedule",
     }
   );
-  return Appointment;
+  return Schedule;
 };
