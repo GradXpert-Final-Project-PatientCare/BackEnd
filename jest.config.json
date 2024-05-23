@@ -1,0 +1,19 @@
+{
+  "moduleFileExtensions": ["js", "json"],
+  "modulePaths": ["src"],
+  "moduleDirectories": ["node_modules"],
+  "testMatch": ["<rootDir>/__tests__/**/*.(test).{js,jsx,ts,tsx}"],
+  "collectCoverageFrom": ["src/**/*.js"],
+  "coveragePathIgnorePatterns": ["src/migrations", "src/models", "src/seeders", "src/routers", "app.js"],
+  "coverageProvider": "v8",
+  "coverageThreshold": {
+    "global": {
+      "branches": 10,
+      "functions": 10,
+      "lines": 10,
+      "statements": 10
+    }
+  },
+  "testTimeout": 30000,
+  "testEnvironment": "node"
+}

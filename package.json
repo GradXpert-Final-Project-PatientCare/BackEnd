@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watch --detectOpenHandles",
+    "test": "jest --coverage --config ./jest.config.json",
     "dev": "nodemon bin/http",
     "start": "node bin/http"
   },
