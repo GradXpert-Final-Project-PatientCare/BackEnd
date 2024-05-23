@@ -1,8 +1,9 @@
-const { Doctor, User, Appointment } = require("../models");
+const { Timeslot, Doctor, User, Appointment, sequelize } = require("../models");
+const { Op } = require("sequelize");
 
 class AppointmentController {
-  static async GetUserAppointment(req, res) {
-    if (!req.ability.can('read', 'Doctor')) {
+  static async GetUserAppointment(req, res, next) {
+    if (!req.ability.can("read", "Doctor")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
@@ -12,9 +13,10 @@ class AppointmentController {
       let appointments = await Appointment.findAll({
         where: {
           UserId: authenticatedUser.id,
+          status: 'dipesan'
         },
-        include: [Doctor, User],
-      })
+        include: [Doctor, User, Timeslot],
+      });
 
       res.status(200).json({
         status: 200,
@@ -26,73 +28,235 @@ class AppointmentController {
     }
   }
 
-  static async CreateAppointment(req, res) {
+  static async GetUserAppointmentHistory(req, res, next) {
+    if (!req.ability.can("read", "Doctor")) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
+    try {
+      let authenticatedUser = req.user;
+      let appointments = await Appointment.findAll({
+        where: {
+          UserId: authenticatedUser.id,
+          status: {
+            [Op.or]: ['dibatalkan', 'selesai'],
+          }
+        },
+        include: [Doctor, User, Timeslot],
+      });
+
+      res.status(200).json({
+        status: 200,
+        message: "Successfully retrieve appointment list",
+        data: appointments,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async CreateAppointment(req, res, next) {
     try {
       let UserId = req.user.id;
-      const { DoctorId, waktu, keterangan } = req.body;
+      const { TimeslotId, keterangan } = req.body;
 
-      let result = await Appointment.create({
-        DoctorId,
-        UserId,
-        waktu,
-        keterangan,
+      let slot = await Timeslot.findOne({
+        where: {
+          id: TimeslotId,
+        },
+        include: { all: true, nested: true },
       });
 
-      res.status(201).json(result);
+      if (!slot) {
+        const error = new Error(`Timeslot requested not found`);
+        error.status = 404;
+        return next(error);
+      }
+
+      if (slot.slotTersedia <= 0) {
+        const error = new Error(`Timeslot quota already full`);
+        error.status = 409;
+        return next(error);
+      }
+
+      const sisaKuota = slot.slotTersedia - 1;
+      const t = await sequelize.transaction();
+
+      try {
+        slot.set({
+          slotTersedia: sisaKuota,
+        });
+
+        await slot.save({ transaction: t });
+
+        await Appointment.create(
+          {
+            UserId,
+            DoctorId: slot.Schedule.Doctor.id,
+            TimeslotId,
+            status: "dipesan",
+            keterangan,
+          },
+          { transaction: t }
+        );
+
+        await t.commit();
+      } catch (error) {
+        await t.rollback();
+        const err = new Error(`Transaction Failed`);
+        err.status = 422;
+        return next(err);
+      }
+
+      res.status(201).json({
+        status: 200,
+        message: "Successfully create appointment",
+      });
     } catch (error) {
-      res.status(500).json({ code: 500, message: [error.name] });
+      return next(error);
     }
   }
 
-  static async UpdateAppointmentById(req, res) {
-    let id = +req.params.id;
-    let authenticatedUser = req.user;
-    const { waktu, keterangan } = req.body;
+  static async UpdateAppointmentById(req, res, next) {
+    let AppointmentId = +req.params.id;
+    const { TimeslotId, keterangan } = req.body;
 
     try {
-      let getAppointment = await Appointment.findByPk(id);
-
-      if (!getAppointment) {
-        throw { name: "appointment not found" };
-      }
-
-      if (getAppointment.UserId !== authenticatedUser.id) {
-        throw { name: "unauthorized" };
-      }
-
-      getAppointment.set({
-        waktu,
-        keterangan,
+      let appointment = await Appointment.findOne({
+        where: {
+          id: AppointmentId,
+        },
       });
 
-      let result = await getAppointment.save();
+      if (!appointment) {
+        const error = new Error(`Appointment requested not found`);
+        error.status = 404;
+        return next(error);
+      }
 
-      res.status(200).json(result);
+      let prevSlot = await Timeslot.findOne({
+        where: {
+          id: appointment.TimeslotId,
+        },
+        include: { all: true, nested: true },
+      });
+
+      if (!prevSlot) {
+        const error = new Error(`Previous timeslot not found`);
+        error.status = 404;
+        return next(error);
+      }
+
+      let slot = await Timeslot.findOne({
+        where: {
+          id: TimeslotId,
+        },
+        include: { all: true, nested: true },
+      });
+
+      if (!slot) {
+        const error = new Error(`Timeslot requested not found`);
+        error.status = 404;
+        return next(error);
+      }
+
+      if (slot.slotTersedia <= 0) {
+        const error = new Error(`Timeslot quota already full`);
+        error.status = 409;
+        return next(error);
+      }
+
+      const t = await sequelize.transaction();
+
+      try {
+        prevSlot.set({
+          slotTersedia: prevSlot.slotTersedia + 1,
+        });
+
+        slot.set({
+          slotTersedia: slot.slotTersedia - 1,
+        });
+
+        appointment.TimeslotId = slot.id;
+        if (keterangan) {
+          appointment.keterangan = keterangan;
+        }
+
+        await prevSlot.save({ transaction: t });
+        await slot.save({ transaction: t });
+        await appointment.save({ transaction: t });
+
+        await t.commit();
+      } catch (error) {
+        await t.rollback();
+        const err = new Error(`Transaction Failed`);
+        err.status = 422;
+        return next(err);
+      }
+
+      res.status(201).json({
+        status: 200,
+        message: "Successfully update appointment",
+      });
     } catch (error) {
-      res.status(500).json({ code: 500, message: [error.name] });
+      return next(error);
     }
   }
 
-  static async DeleteAppointmentByID(req, res) {
-    let id = +req.params.id;
-    let authenticatedUser = req.user;
+  static async CancelAppointmentByID(req, res, next) {
+    let AppointmentId = +req.params.id;
 
     try {
-      let getAppointment = await Appointment.findByPk(id);
+      let appointment = await Appointment.findOne({
+        where: {
+          id: AppointmentId,
+        },
+      });
 
-      if (!getAppointment) {
-        throw { name: "appointment not found" };
+      if (!appointment) {
+        const error = new Error(`Appointment requested not found`);
+        error.status = 404;
+        return next(error);
       }
 
-      if (getAppointment.UserId !== authenticatedUser.id) {
-        throw { name: "unauthorized" };
-      }
+      appointment.status = 'dibatalkan';
+      await appointment.save();
 
-      let result = await getAppointment.destroy();
-
-      res.status(200).json(result);
+      res.status(201).json({
+        status: 200,
+        message: "Successfully cancel appointment",
+      });
     } catch (error) {
-      res.status(500).json({ code: 500, message: [error.name] });
+      return next(error);
+    }
+  }
+
+  static async CompleteAppointmentByID(req, res, next) {
+    let AppointmentId = +req.params.id;
+
+    try {
+      let appointment = await Appointment.findOne({
+        where: {
+          id: AppointmentId,
+        },
+      });
+
+      if (!appointment) {
+        const error = new Error(`Appointment requested not found`);
+        error.status = 404;
+        return next(error);
+      }
+
+      appointment.status = 'selesai';
+      await appointment.save();
+
+      res.status(201).json({
+        status: 200,
+        message: "Successfully complete appointment",
+      });
+    } catch (error) {
+      return next(error);
     }
   }
 }

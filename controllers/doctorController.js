@@ -1,14 +1,29 @@
 const { Doctor } = require("../models");
+const { Op } = require("sequelize");
 
 class DoctorController {
   static async GetAllDoctors(req, res, next) {
-    if (!req.ability.can('read', 'Doctor')) {
+    if (!req.ability.can("read", "Doctor")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
     }
     try {
-      let doctors = await Doctor.findAll();
+      const { page, search } = req.query;
+      const paramQuerySQL = {};
+
+      const size = 5;
+      const skip = ((page ?? 1) - 1) * size;
+
+      // pagination
+      paramQuerySQL.limit = size;
+      paramQuerySQL.offset = skip;
+
+      //search
+      if (search) {
+        paramQuerySQL.where = { nama: { [Op.iLike]: `%${search}%` } };
+      }
+      let doctors = await Doctor.findAndCountAll(paramQuerySQL);
 
       res.status(200).json({
         status: 200,
@@ -21,7 +36,7 @@ class DoctorController {
   }
 
   static async GetDoctorByID(req, res, next) {
-    if (!req.ability.can('read', 'Doctor')) {
+    if (!req.ability.can("read", "Doctor")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);

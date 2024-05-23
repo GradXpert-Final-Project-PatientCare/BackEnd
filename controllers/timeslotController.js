@@ -18,9 +18,14 @@ class TimeslotController {
         return next(error);
       }
 
+      const TODAY_START = new Date().setHours(0, 0, 0, 0);
+
       let timeslots = await Timeslot.findAll({
         where: {
           "$Schedule.DoctorId$": { [Op.eq]: id },
+          tanggal: { 
+            [Op.gt]: TODAY_START,
+          }
         },
         include: [Schedule],
       });

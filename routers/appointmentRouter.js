@@ -5,8 +5,10 @@ const appointmentRouter = express.Router();
 
 appointmentRouter.use(authentication)
 appointmentRouter.get('/list', AppointmentController.GetUserAppointment);
-appointmentRouter.post('/', AppointmentController.CreateAppointment);
-appointmentRouter.patch('/:id', AppointmentController.UpdateAppointmentById);
-appointmentRouter.delete('/:id', AppointmentController.DeleteAppointmentByID);
+appointmentRouter.get('/history', AppointmentController.GetUserAppointmentHistory);
+appointmentRouter.post('/create', AppointmentController.CreateAppointment);
+appointmentRouter.patch('/update/:id', AppointmentController.UpdateAppointmentById);
+appointmentRouter.patch('/cancel/:id', AppointmentController.CancelAppointmentByID);
+appointmentRouter.patch('/complete/:id', AppointmentController.CompleteAppointmentByID);
 
 module.exports = appointmentRouter;

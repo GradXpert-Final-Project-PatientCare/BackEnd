@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
-const PRIVATE_KEY = 'inirahasia'
+require('dotenv').config()
+const PRIVATE_KEY = process.env.SECRET_KEY
 
 function generateToken(data) {
     return jwt.sign(data, PRIVATE_KEY)
