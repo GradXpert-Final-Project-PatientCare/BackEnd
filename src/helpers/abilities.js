@@ -1,11 +1,7 @@
 const { AbilityBuilder, PureAbility } = require("@casl/ability");
 
 function defineAbilityFor(user) {
-  if (user) {
     return new PureAbility(defineRulesFor(user));
-  }
-
-  return new PureAbility(defineRulesFor({}));
 }
 
 function defineRulesFor(user) {
