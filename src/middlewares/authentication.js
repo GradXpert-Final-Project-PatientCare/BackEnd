@@ -5,11 +5,6 @@ const { defineAbilityFor } = require("../helpers/abilities");
 async function authentication(req, res, next) {
   try {
     const bearerHeader = req.headers["authorization"];
-    if (!bearerHeader) {
-      const error = new Error(`Authentication Error`);
-      error.status = 401;
-      return next(error);
-    }
 
     //split the space at the bearer
     const bearer = bearerHeader.split(" ");
@@ -40,8 +35,10 @@ async function authentication(req, res, next) {
     req.user = user;
     req.ability = defineAbilityFor(user);
     next();
-  } catch (error) {
-    res.status(401).json({ code: 401, message: [error.name] });
+  } catch (err) {
+    const error = new Error(`Authentication Error`);
+    error.status = 401;
+    return next(error);
   }
 }
 
