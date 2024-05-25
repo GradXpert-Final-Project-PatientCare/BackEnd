@@ -37,7 +37,6 @@ class AppointmentController {
         data: dataResponse,
       });
     } catch (error) {
-      console.log(error)
       return next(error);
     }
   }

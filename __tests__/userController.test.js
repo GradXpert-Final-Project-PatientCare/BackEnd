@@ -176,31 +176,35 @@ describe("UserController", () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        accessToken: "generated-token",
-        email: "test@example.com",
-        username: fakeUser.username,
-        rules: [
-          {
-            action: ["read", "create", "update"],
-            subject: "Appointment",
-          },
-          {
-            action: ["read"],
-            subject: "Doctor",
-          },
-          {
-            action: ["read"],
-            subject: "Schedule",
-          },
-          {
-            action: ["read"],
-            subject: "Timeslot",
-          },
-          {
-            action: ["read"],
-            subject: "User",
-          },
-        ],
+        message: "Successfully retrieve user profile",
+        status: 200,
+        data: {
+          accessToken: "generated-token",
+          email: "test@example.com",
+          username: fakeUser.username,
+          rules: [
+            {
+              action: ["read", "create", "update"],
+              subject: "Appointment",
+            },
+            {
+              action: ["read"],
+              subject: "Doctor",
+            },
+            {
+              action: ["read"],
+              subject: "Schedule",
+            },
+            {
+              action: ["read"],
+              subject: "Timeslot",
+            },
+            {
+              action: ["read"],
+              subject: "User",
+            },
+          ],
+        },
       });
     });
   });

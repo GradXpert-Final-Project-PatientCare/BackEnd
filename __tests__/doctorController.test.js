@@ -1,6 +1,5 @@
 const DoctorController = require("../src/controllers/doctorController");
 const { Doctor } = require("../src/models");
-const { Op } = require("sequelize");
 
 jest.mock("../src/models", () => ({
   Doctor: {
