@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Doctor extends Model {
     /**
@@ -12,61 +10,69 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // this.belongsToMany(models.User, { through: models.Appointment, foreignKey: 'DoctorId' , as: 'users'});
-      this.hasMany(models.Appointment)
-      this.hasMany(models.Schedule)
+      this.hasMany(models.Appointment);
+      this.hasMany(models.Schedule);
     }
   }
-  Doctor.init({
-    nama: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:'Tidak boleh null'
+  Doctor.init(
+    {
+      nama: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Tidak boleh null",
+          },
+          notEmpty: {
+            msg: "Tidak boleh kosong",
+          },
         },
-        notEmpty:{
-          msg:'Tidak boleh kosong'
-        }
-        
-      }
-    },
-    spesialis: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:'Tidak boleh null'
+      },
+      spesialis: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Tidak boleh null",
+          },
+          notEmpty: {
+            msg: "Tidak boleh kosong",
+          },
         },
-        notEmpty:{
-          msg:'Tidak boleh kosong'
-        }
-        
-      }
-    },
-    alamatPraktek: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:'Tidak boleh null'
+      },
+      alamatPraktek: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Tidak boleh null",
+          },
+          notEmpty: {
+            msg: "Tidak boleh kosong",
+          },
         },
-        notEmpty:{
-          msg:'Tidak boleh kosong'
-        }
-        
-      }
+      },
+      telepon: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      image_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      experience: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
-    telepon: {
-      type:DataTypes.STRING,
-      allowNull:true,
-    },
-    email: {
-      type:DataTypes.STRING,
-      allowNull:true,
+    {
+      sequelize,
+      modelName: "Doctor",
     }
-  }, {
-    sequelize,
-    modelName: 'Doctor',
-  });
+  );
   return Doctor;
 };

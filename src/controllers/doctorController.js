@@ -1,4 +1,4 @@
-const { Doctor } = require("../models");
+const { Doctor, Schedule } = require("../models");
 const { Op } = require("sequelize");
 
 class DoctorController {
@@ -43,20 +43,40 @@ class DoctorController {
     }
     try {
       let id = +req.params.id;
-      let doctor = await Doctor.findByPk(id);
+      let doctor = await Doctor.findOne({ where: { id }, include: [Schedule] });
 
       if (!doctor) {
         const error = new Error(`Doctor requested not found`);
         error.status = 404;
         return next(error);
       }
-
+      
+      const dataResponse = {
+        id: doctor.id,
+        nama: doctor.nama,
+        spesialis: doctor.spesialis,
+        alamatPraktek: doctor.alamatPraktek,
+        telepon: doctor.telepon,
+        email: doctor.email,
+        image_url: doctor.image_url,
+        experience: doctor.experience,
+        schedule: doctor.Schedules.map((x) => {
+          const schedule = {
+            id: x.id,
+            hari: x.hari,
+            waktu: x.waktu,
+          };
+          return schedule;
+        }),
+      };
+    
       res.status(200).json({
         status: 200,
         message: `Successfully retrieve doctor with id ${id}`,
-        data: doctor,
+        data: dataResponse,
       });
     } catch (error) {
+      console.log(error)
       return next(error);
     }
   }

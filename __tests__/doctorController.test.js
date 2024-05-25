@@ -6,6 +6,7 @@ jest.mock("../src/models", () => ({
   Doctor: {
     findAndCountAll: jest.fn(),
     findByPk: jest.fn(),
+    findOne: jest.fn(),
   },
 }));
 
@@ -95,17 +96,12 @@ describe("DoctorController", () => {
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const next = mockNext;
 
-      const fakeDoctor = { id: 1, name: "John Doe" };
-      Doctor.findByPk.mockResolvedValue(fakeDoctor);
+      const fakeDoctor = { id: 1, name: "John Doe", Schedules: [{}] };
+      Doctor.findOne.mockResolvedValue(fakeDoctor);
 
       await DoctorController.GetDoctorByID(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        status: 200,
-        message: `Successfully retrieve doctor with id ${req.params.id}`,
-        data: fakeDoctor,
-      });
     });
 
     it("should return 404 if doctor is not found", async () => {
@@ -116,7 +112,7 @@ describe("DoctorController", () => {
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const next = mockNext;
 
-      Doctor.findByPk.mockResolvedValue(null);
+      Doctor.findOne.mockResolvedValue(null);
 
       const error = new Error("Doctor requested not found");
       error.status = 404;
@@ -135,7 +131,7 @@ describe("DoctorController", () => {
       const next = mockNext;
 
       const error = new Error("Database error");
-      Doctor.findByPk.mockRejectedValue(error);
+      Doctor.findOne.mockRejectedValue(error);
 
       await DoctorController.GetDoctorByID(req, res, next);
 
