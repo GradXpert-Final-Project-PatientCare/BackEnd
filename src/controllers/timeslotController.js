@@ -23,17 +23,28 @@ class TimeslotController {
       let timeslots = await Timeslot.findAll({
         where: {
           "$Schedule.DoctorId$": { [Op.eq]: id },
-          tanggal: { 
+          tanggal: {
             [Op.gt]: TODAY_START,
-          }
+          },
         },
         include: [Schedule],
+      });
+
+      const dataResponse = timeslots.map((x) => {
+        const response = {
+          id: x.id,
+          kuota: x.slotTersedia,
+          tanggal: x.tanggal,
+          hari: x.Schedule.hari,
+          waktu: x.Schedule.waktu,
+        };
+        return response;
       });
 
       res.status(200).json({
         status: 200,
         message: "Successfully retrieve schedule for requested doctor",
-        data: timeslots,
+        data: dataResponse,
       });
     } catch (error) {
       return next(error);

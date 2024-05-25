@@ -35,7 +35,10 @@ class UserController {
       password,
     });
 
-    res.status(201).json({ message: "Register account success" });
+    res.status(201).json({
+      status: 200,
+      message: "Register account success",
+    });
   }
 
   static async Login(req, res, next) {
@@ -69,11 +72,17 @@ class UserController {
       email: user.email
     });
 
-    res.status(200).json({
+    const dataResponse = {
       accessToken: token,
       email: email,
       username: user.username,
       rules: defineRulesFor(user),
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: "Successfully retrieve user profile",
+      data: dataResponse,
     });
   }
 

@@ -15,15 +15,29 @@ class AppointmentController {
           UserId: authenticatedUser.id,
           status: 'dipesan'
         },
-        include: [Doctor, User, Timeslot],
+        include: { all: true, nested: true },
+      });
+
+      const dataResponse = appointments.map((x) => {
+        const response = {
+          id: x.id,
+          status: x.status,
+          keterangan: x.keterangan,
+          tanggal: x.Timeslot.tanggal,
+          hari: x.Timeslot.Schedule.hari,
+          waktu: x.Timeslot.Schedule.waktu,
+          dokter: x.Doctor.nama
+        };
+        return response;
       });
 
       res.status(200).json({
         status: 200,
         message: "Successfully retrieve appointment list",
-        data: appointments,
+        data: dataResponse,
       });
     } catch (error) {
+      console.log(error)
       return next(error);
     }
   }
@@ -43,13 +57,26 @@ class AppointmentController {
             [Op.or]: ['dibatalkan', 'selesai'],
           }
         },
-        include: [Doctor, User, Timeslot],
+        include: { all: true, nested: true },
+      });
+
+      const dataResponse = appointments.map((x) => {
+        const response = {
+          id: x.id,
+          status: x.status,
+          keterangan: x.keterangan,
+          tanggal: x.Timeslot.tanggal,
+          hari: x.Timeslot.Schedule.hari,
+          waktu: x.Timeslot.Schedule.waktu,
+          dokter: x.Doctor.nama
+        };
+        return response;
       });
 
       res.status(200).json({
         status: 200,
         message: "Successfully retrieve appointment list",
-        data: appointments,
+        data: dataResponse,
       });
     } catch (error) {
       return next(error);
