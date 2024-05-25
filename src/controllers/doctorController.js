@@ -3,11 +3,6 @@ const { Op } = require("sequelize");
 
 class DoctorController {
   static async GetAllDoctors(req, res, next) {
-    if (!req.ability.can("read", "Doctor")) {
-      const error = new Error(`Forbidden resource`);
-      error.status = 403;
-      return next(error);
-    }
     try {
       const { page, search } = req.query;
       const paramQuerySQL = {};
@@ -36,11 +31,6 @@ class DoctorController {
   }
 
   static async GetDoctorByID(req, res, next) {
-    if (!req.ability.can("read", "Doctor")) {
-      const error = new Error(`Forbidden resource`);
-      error.status = 403;
-      return next(error);
-    }
     try {
       let id = +req.params.id;
       let doctor = await Doctor.findOne({ where: { id }, include: [Schedule] });

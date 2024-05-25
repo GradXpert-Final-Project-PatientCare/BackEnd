@@ -52,7 +52,7 @@ class TimeslotController {
   }
 
   static async GenerateTimeslot(req, res, next) {
-    if (!req.ability.can("create", "Schedule")) {
+    if (!req.ability.can("create", "Timeslot")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
@@ -145,7 +145,6 @@ class TimeslotController {
         message: "Successfully generate timeslots",
       });
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }

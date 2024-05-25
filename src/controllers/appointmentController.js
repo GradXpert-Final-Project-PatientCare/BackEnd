@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 
 class AppointmentController {
   static async GetUserAppointment(req, res, next) {
-    if (!req.ability.can("read", "Doctor")) {
+    if (!req.ability.can("read", "Appointment")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
@@ -13,7 +13,7 @@ class AppointmentController {
       let appointments = await Appointment.findAll({
         where: {
           UserId: authenticatedUser.id,
-          status: 'dipesan'
+          status: "dipesan",
         },
         include: { all: true, nested: true },
       });
@@ -26,7 +26,7 @@ class AppointmentController {
           tanggal: x.Timeslot.tanggal,
           hari: x.Timeslot.Schedule.hari,
           waktu: x.Timeslot.Schedule.waktu,
-          dokter: x.Doctor.nama
+          dokter: x.Doctor.nama,
         };
         return response;
       });
@@ -42,7 +42,7 @@ class AppointmentController {
   }
 
   static async GetUserAppointmentHistory(req, res, next) {
-    if (!req.ability.can("read", "Doctor")) {
+    if (!req.ability.can("read", "Appointment")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
@@ -53,8 +53,8 @@ class AppointmentController {
         where: {
           UserId: authenticatedUser.id,
           status: {
-            [Op.or]: ['dibatalkan', 'selesai'],
-          }
+            [Op.or]: ["dibatalkan", "selesai"],
+          },
         },
         include: { all: true, nested: true },
       });
@@ -67,7 +67,7 @@ class AppointmentController {
           tanggal: x.Timeslot.tanggal,
           hari: x.Timeslot.Schedule.hari,
           waktu: x.Timeslot.Schedule.waktu,
-          dokter: x.Doctor.nama
+          dokter: x.Doctor.nama,
         };
         return response;
       });
@@ -83,6 +83,11 @@ class AppointmentController {
   }
 
   static async CreateAppointment(req, res, next) {
+    if (!req.ability.can("create", "Appointment")) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
     try {
       let UserId = req.user.id;
       const { TimeslotId, keterangan } = req.body;
@@ -145,10 +150,15 @@ class AppointmentController {
   }
 
   static async UpdateAppointmentById(req, res, next) {
-    let AppointmentId = +req.params.id;
-    const { TimeslotId, keterangan } = req.body;
-
+    if (!req.ability.can("update", "Appointment")) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
     try {
+      let AppointmentId = +req.params.id;
+      const { TimeslotId, keterangan } = req.body;
+
       let appointment = await Appointment.findOne({
         where: {
           id: AppointmentId,
@@ -231,9 +241,13 @@ class AppointmentController {
   }
 
   static async CancelAppointmentByID(req, res, next) {
-    let AppointmentId = +req.params.id;
-
+    if (!req.ability.can("update", "Appointment")) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
     try {
+      let AppointmentId = +req.params.id;
       let appointment = await Appointment.findOne({
         where: {
           id: AppointmentId,
@@ -246,7 +260,7 @@ class AppointmentController {
         return next(error);
       }
 
-      appointment.status = 'dibatalkan';
+      appointment.status = "dibatalkan";
       await appointment.save();
 
       res.status(201).json({
@@ -259,9 +273,13 @@ class AppointmentController {
   }
 
   static async CompleteAppointmentByID(req, res, next) {
-    let AppointmentId = +req.params.id;
-
+    if (!req.ability.can("update", "Appointment")) {
+      const error = new Error(`Forbidden resource`);
+      error.status = 403;
+      return next(error);
+    }
     try {
+      let AppointmentId = +req.params.id;
       let appointment = await Appointment.findOne({
         where: {
           id: AppointmentId,
@@ -274,7 +292,7 @@ class AppointmentController {
         return next(error);
       }
 
-      appointment.status = 'selesai';
+      appointment.status = "selesai";
       await appointment.save();
 
       res.status(201).json({

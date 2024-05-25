@@ -1,5 +1,11 @@
 const AppointmentController = require("../src/controllers/appointmentController");
-const { Timeslot, Doctor, User, Appointment, sequelize } = require("../src/models");
+const {
+  Timeslot,
+  Doctor,
+  User,
+  Appointment,
+  sequelize,
+} = require("../src/models");
 const { Op } = require("sequelize");
 
 jest.mock("../src/models", () => ({
@@ -176,8 +182,24 @@ describe("AppointmentController", () => {
   });
 
   describe("CreateAppointment", () => {
+    it("should return 403 if permission is not authorized", async () => {
+      const req = {
+        ability: { can: jest.fn().mockReturnValue(false) },
+        user: { id: 1 },
+      };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const next = mockNext;
+
+      const error = new Error("Forbidden resource");
+      error.status = 403;
+
+      await AppointmentController.CreateAppointment(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
     it("should return 404 if timeslot is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         user: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Test appointment" },
       };
@@ -196,6 +218,7 @@ describe("AppointmentController", () => {
 
     it("should return 409 if timeslot quota is full", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         user: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Test appointment" },
       };
@@ -216,6 +239,7 @@ describe("AppointmentController", () => {
 
     it("should create appointment if timeslot is found and quota is available", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         user: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Test appointment" },
       };
@@ -261,6 +285,7 @@ describe("AppointmentController", () => {
 
     it("should return 422 if transaction fails", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         user: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Test appointment" },
       };
@@ -292,6 +317,7 @@ describe("AppointmentController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         user: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Test appointment" },
       };
@@ -308,8 +334,24 @@ describe("AppointmentController", () => {
   });
 
   describe("UpdateAppointmentById", () => {
+    it("should return 403 if permission is not authorized", async () => {
+      const req = {
+        ability: { can: jest.fn().mockReturnValue(false) },
+        user: { id: 1 },
+      };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const next = mockNext;
+
+      const error = new Error("Forbidden resource");
+      error.status = 403;
+
+      await AppointmentController.UpdateAppointmentById(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
     it("should return 404 if appointment is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Updated appointment" },
       };
@@ -328,6 +370,7 @@ describe("AppointmentController", () => {
 
     it("should return 404 if previous timeslot is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 1, keterangan: "Updated appointment" },
       };
@@ -349,6 +392,7 @@ describe("AppointmentController", () => {
 
     it("should return 404 if new timeslot is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 2, keterangan: "Updated appointment" },
       };
@@ -356,7 +400,11 @@ describe("AppointmentController", () => {
       const next = mockNext;
 
       const fakeAppointment = { TimeslotId: 1 };
-      const fakePrevTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
+      const fakePrevTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
 
       Appointment.findOne.mockResolvedValue(fakeAppointment);
       Timeslot.findOne.mockResolvedValueOnce(fakePrevTimeslot);
@@ -372,6 +420,7 @@ describe("AppointmentController", () => {
 
     it("should return 409 if new timeslot quota is full", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 2, keterangan: "Updated appointment" },
       };
@@ -379,8 +428,16 @@ describe("AppointmentController", () => {
       const next = mockNext;
 
       const fakeAppointment = { TimeslotId: 1 };
-      const fakePrevTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
-      const fakeNewTimeslot = { slotTersedia: 0, set: jest.fn(), save: jest.fn() };
+      const fakePrevTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
+      const fakeNewTimeslot = {
+        slotTersedia: 0,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
 
       Appointment.findOne.mockResolvedValue(fakeAppointment);
       Timeslot.findOne.mockResolvedValueOnce(fakePrevTimeslot);
@@ -396,15 +453,28 @@ describe("AppointmentController", () => {
 
     it("should update appointment if timeslots are found and quota is available", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 2, keterangan: "Updated appointment" },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const next = mockNext;
 
-      const fakeAppointment = { TimeslotId: 1, set: jest.fn(), save: jest.fn() };
-      const fakePrevTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
-      const fakeNewTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
+      const fakeAppointment = {
+        TimeslotId: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
+      const fakePrevTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
+      const fakeNewTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
 
       const t = { commit: jest.fn(), rollback: jest.fn() };
       sequelize.transaction.mockResolvedValue(t);
@@ -430,15 +500,28 @@ describe("AppointmentController", () => {
 
     it("should return 422 if transaction fails", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 2, keterangan: "Updated appointment" },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const next = mockNext;
 
-      const fakeAppointment = { TimeslotId: 1, set: jest.fn(), save: jest.fn() };
-      const fakePrevTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
-      const fakeNewTimeslot = { slotTersedia: 1, set: jest.fn(), save: jest.fn() };
+      const fakeAppointment = {
+        TimeslotId: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
+      const fakePrevTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
+      const fakeNewTimeslot = {
+        slotTersedia: 1,
+        set: jest.fn(),
+        save: jest.fn(),
+      };
 
       const t = { commit: jest.fn(), rollback: jest.fn() };
       sequelize.transaction.mockResolvedValue(t);
@@ -459,6 +542,7 @@ describe("AppointmentController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
         body: { TimeslotId: 2, keterangan: "Updated appointment" },
       };
@@ -475,8 +559,24 @@ describe("AppointmentController", () => {
   });
 
   describe("CancelAppointmentByID", () => {
+    it("should return 403 if permission is not authorized", async () => {
+      const req = {
+        ability: { can: jest.fn().mockReturnValue(false) },
+        user: { id: 1 },
+      };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const next = mockNext;
+
+      const error = new Error("Forbidden resource");
+      error.status = 403;
+
+      await AppointmentController.CancelAppointmentByID(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
     it("should return 404 if appointment is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -494,6 +594,7 @@ describe("AppointmentController", () => {
 
     it("should cancel appointment if found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -516,6 +617,7 @@ describe("AppointmentController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -531,8 +633,24 @@ describe("AppointmentController", () => {
   });
 
   describe("CompleteAppointmentByID", () => {
+    it("should return 403 if permission is not authorized", async () => {
+      const req = {
+        ability: { can: jest.fn().mockReturnValue(false) },
+        user: { id: 1 },
+      };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const next = mockNext;
+
+      const error = new Error("Forbidden resource");
+      error.status = 403;
+
+      await AppointmentController.CompleteAppointmentByID(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
     it("should return 404 if appointment is not found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -550,6 +668,7 @@ describe("AppointmentController", () => {
 
     it("should complete appointment if found", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -572,6 +691,7 @@ describe("AppointmentController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
+        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };

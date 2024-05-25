@@ -13,25 +13,8 @@ const mockNext = jest.fn();
 
 describe("DoctorController", () => {
   describe("GetAllDoctors", () => {
-    it("should return 403 if permission is not authorized", async () => {
-      const req = {
-        ability: { can: jest.fn().mockReturnValue(false) },
-        query: {},
-      };
-      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-      const next = mockNext;
-
-      const error = new Error("Forbidden resource");
-      error.status = 403;
-
-      await DoctorController.GetAllDoctors(req, res, next);
-
-      expect(next).toHaveBeenCalledWith(error);
-    });
-
     it("should return doctors with pagination and search", async () => {
       const req = {
-        ability: { can: jest.fn().mockReturnValue(true) },
         query: { page: 1, search: "John" },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -55,7 +38,6 @@ describe("DoctorController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
-        ability: { can: jest.fn().mockReturnValue(true) },
         query: {},
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -71,25 +53,8 @@ describe("DoctorController", () => {
   });
 
   describe("GetDoctorByID", () => {
-    it("should return 403 if permission is not authorized", async () => {
-      const req = {
-        ability: { can: jest.fn().mockReturnValue(false) },
-        params: { id: 1 },
-      };
-      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-      const next = mockNext;
-
-      const error = new Error("Forbidden resource");
-      error.status = 403;
-
-      await DoctorController.GetDoctorByID(req, res, next);
-
-      expect(next).toHaveBeenCalledWith(error);
-    });
-
     it("should return doctor details if found", async () => {
       const req = {
-        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -105,7 +70,6 @@ describe("DoctorController", () => {
 
     it("should return 404 if doctor is not found", async () => {
       const req = {
-        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -123,7 +87,6 @@ describe("DoctorController", () => {
 
     it("should return 500 if an error occurs", async () => {
       const req = {
-        ability: { can: jest.fn().mockReturnValue(true) },
         params: { id: 1 },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
