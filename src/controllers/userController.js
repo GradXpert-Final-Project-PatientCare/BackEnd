@@ -25,7 +25,7 @@ class UserController {
 
     if (!emailRegexp.test(email)) {
       const error = new Error(`invalid email format`);
-      error.status = 409;
+      error.status = 401;
       return next(error);
     }
 
