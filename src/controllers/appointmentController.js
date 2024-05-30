@@ -27,6 +27,7 @@ class AppointmentController {
           hari: x.Timeslot.Schedule.hari,
           waktu: x.Timeslot.Schedule.waktu,
           dokter: x.Doctor.nama,
+          dokterId: x.Doctor.id,
         };
         return response;
       });
