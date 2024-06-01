@@ -9,9 +9,11 @@ const emailRegexp =
 class UserController {
   static async Register(req, res, next) {
     const { username, email, password } = req.body;
+    console.log(username)
     if (!username || !password || !email) {
       const error = new Error(`Fields cannot be empty`);
       error.status = 400;
+      console.log(error)
       return next(error);
     }
 
@@ -20,14 +22,17 @@ class UserController {
       // Record Found
       const error = new Error(`email already taken`);
       error.status = 409;
+      console.log(error)
       return next(error);
     }
 
     if (!emailRegexp.test(email)) {
       const error = new Error(`invalid email format`);
       error.status = 401;
+      console.log(error)
       return next(error);
     }
+    console.log('haii')
 
     await User.create({
       username,
