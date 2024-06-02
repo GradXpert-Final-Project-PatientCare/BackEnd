@@ -10,8 +10,10 @@ async function authentication(req, res, next) {
     const bearer = bearerHeader.split(" ");
     //Get token from string
     const bearerToken = bearer[1];
+    console.log('loh')
 
     if (!bearerToken) {
+      console.log('hahaha')
       const error = new Error(`Authentication Error`);
       error.status = 401;
       return next(error);
