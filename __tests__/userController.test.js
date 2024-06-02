@@ -191,6 +191,10 @@ describe("UserController", () => {
               action: ["read"],
               subject: "User",
             },
+            {
+              action: ["read"],
+              subject: "Timeslot",
+            },
           ],
         },
       });

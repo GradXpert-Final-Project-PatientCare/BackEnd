@@ -12,7 +12,6 @@ class UserController {
     if (!username || !password || !email) {
       const error = new Error(`Fields cannot be empty`);
       error.status = 400;
-      console.log(error)
       return next(error);
     }
 
