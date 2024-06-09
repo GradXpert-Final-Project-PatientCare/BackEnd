@@ -153,7 +153,7 @@ class TransactionController {
         throw error;
       }
 
-      if (transactionStatus == "capture" && fraudStatus == "accept") {
+      if (transactionStatus == "settlement" && fraudStatus == "accept") {
         await Appointment.create({
           UserId: trx.UserId,
           DoctorId: trx.DoctorId,
