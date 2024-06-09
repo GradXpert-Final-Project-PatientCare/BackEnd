@@ -22,6 +22,7 @@ function defineAdminRules({ can }) {
 
 function defineUserRules({ can }, user) {
   can(["read", "create", "update"], "Appointment");
+  can(["create"], "Transaction");
   can(["read"], "User");
   can(["read"], "Timeslot");
 }

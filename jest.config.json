@@ -4,7 +4,7 @@
   "moduleDirectories": ["node_modules"],
   "testMatch": ["<rootDir>/__tests__/**/*.(test).{js,jsx,ts,tsx}"],
   "collectCoverageFrom": ["src/**/*.js"],
-  "coveragePathIgnorePatterns": ["src/models", "src/routers", "app.js"],
+  "coveragePathIgnorePatterns": ["routers", "models" , "app.js"],
   "coverageProvider": "v8",
   "coverageThreshold": {
     "global": {

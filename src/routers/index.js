@@ -4,6 +4,7 @@ const doctorRouter = require("./doctorRouter");
 const appointmentRouter = require("./appointmentRouter");
 const scheduleRouter = require("./scheduleRouter");
 const timeslotRouter = require("./timeslotRouter");
+const transactionRouter = require("./transactionRouter");
 const errorHandler = require("../middlewares/error");
 const notFound = require("../middlewares/notFound");
 
@@ -18,6 +19,7 @@ router.use("/doctor", doctorRouter);
 router.use("/appointment", appointmentRouter);
 router.use("/schedule", scheduleRouter);
 router.use("/timeslot", timeslotRouter);
+router.use("/transaction", transactionRouter);
 
 // Error handler
 router.use(notFound);

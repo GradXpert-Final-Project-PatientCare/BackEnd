@@ -188,6 +188,10 @@ describe("UserController", () => {
               subject: "Appointment",
             },
             {
+              action: ["create"],
+              subject: "Transaction",
+            },
+            {
               action: ["read"],
               subject: "User",
             },
