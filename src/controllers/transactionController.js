@@ -134,46 +134,52 @@ class TransactionController {
       `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
     );
 
-    let trx = await Transaction.findOne({
-      where: {
-        id: orderId,
-      },
-    });
-
-    if (!trx) {
-      return;
-    }
-
-    if (transactionStatus == "capture" && fraudStatus == "accept") {
-      await Appointment.create({
-        UserId: trx.UserId,
-        DoctorId: trx.DoctorId,
-        TimeslotId: trx.TimeslotId,
-        status: "dipesan",
-        keterangan: trx.keterangan,
-      });
-      return res.status(200).json({ message: "Payment Success" });
-    } else if (
-      transactionStatus == "cancel" ||
-      transactionStatus == "deny" ||
-      transactionStatus == "expire" ||
-      transactionStatus == "failure" ||
-      fraudStatus == "deny"
-    ) {
-      let slot = await Timeslot.findOne({
+    try {
+      let trx = await Transaction.findOne({
         where: {
-          id: trx.TimeslotId,
+          id: orderId,
         },
       });
-      const sisaKuota = slot.slotTersedia + 1;
-      slot.set({
-        slotTersedia: sisaKuota,
-      });
-      await slot.save();
-      return res.status(200).json({ message: "Payment Failed" });
-    }
 
-    return;
+      if (!trx) {
+        const error = new Error(`Transaction requested not found`);
+        error.status = 404;
+        throw error;
+      }
+
+      if (transactionStatus == "capture" && fraudStatus == "accept") {
+        await Appointment.create({
+          UserId: trx.UserId,
+          DoctorId: trx.DoctorId,
+          TimeslotId: trx.TimeslotId,
+          status: "dipesan",
+          keterangan: trx.keterangan,
+        });
+        return res.status(200).json({ message: "Payment Success" });
+      } else if (
+        transactionStatus == "cancel" ||
+        transactionStatus == "deny" ||
+        transactionStatus == "expire" ||
+        transactionStatus == "failure" ||
+        fraudStatus == "deny"
+      ) {
+        let slot = await Timeslot.findOne({
+          where: {
+            id: trx.TimeslotId,
+          },
+        });
+        const sisaKuota = slot.slotTersedia + 1;
+        slot.set({
+          slotTersedia: sisaKuota,
+        });
+        await slot.save();
+        return res.status(200).json({ message: "Payment Failed" });
+      }
+
+      return;
+    } catch (error) {
+      return next(error);
+    }
   }
 }
 
