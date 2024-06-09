@@ -107,7 +107,6 @@ class TransactionController {
         await t.commit();
       } catch (error) {
         await t.rollback();
-        console.log(error);
         const err = new Error(`Transaction Failed`);
         err.status = 422;
         return next(err);
