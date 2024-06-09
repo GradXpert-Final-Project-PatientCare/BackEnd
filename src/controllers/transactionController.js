@@ -161,6 +161,8 @@ class TransactionController {
           status: "dipesan",
           keterangan: trx.keterangan,
         });
+        trx.status = "success"
+        await trx.save()
         return res.status(200).json({ message: "Payment Success" });
       } else if (
         transactionStatus == "cancel" ||
@@ -179,6 +181,8 @@ class TransactionController {
           slotTersedia: sisaKuota,
         });
         await slot.save();
+        trx.status = "failed"
+        await trx.save()
         return res.status(200).json({ message: "Payment Failed" });
       }
 
