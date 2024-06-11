@@ -8,7 +8,7 @@ const emailRegexp =
 
 class UserController {
   static async Register(req, res, next) {
-    const { username, email, password } = req.body;
+    const { username, email, password, phoneNumber } = req.body;
     if (!username || !password || !email) {
       const error = new Error(`Fields cannot be empty`);
       error.status = 400;
@@ -33,6 +33,7 @@ class UserController {
       username,
       email,
       password,
+      phoneNumber,
     });
 
     res.status(201).json({
@@ -69,7 +70,7 @@ class UserController {
 
     const token = generateToken({
       id: user.id,
-      email: user.email
+      email: user.email,
     });
 
     const dataResponse = {
@@ -77,7 +78,7 @@ class UserController {
       email: email,
       username: user.username,
       rules: defineRulesFor(user),
-    }
+    };
 
     res.status(200).json({
       status: 200,
@@ -86,8 +87,8 @@ class UserController {
     });
   }
 
-  static async Profile (req, res, next) {
-    if (!req.ability.can('read', 'User')) {
+  static async Profile(req, res, next) {
+    if (!req.ability.can("read", "User")) {
       const error = new Error(`Forbidden resource`);
       error.status = 403;
       return next(error);
@@ -106,10 +107,17 @@ class UserController {
         return next(error);
       }
 
+      const dataResponse = {
+        username: user.username,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+      };
+
       res.status(200).json({
         status: 200,
         message: "Successfully retrieve user profile",
-        data: user,
+        data: dataResponse,
       });
     } catch (error) {
       return next(error);

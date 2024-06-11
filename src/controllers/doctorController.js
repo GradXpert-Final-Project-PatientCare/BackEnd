@@ -4,7 +4,7 @@ const { Op } = require("sequelize");
 class DoctorController {
   static async GetAllDoctors(req, res, next) {
     try {
-      const { page, search } = req.query;
+      const { page, search, category, sort } = req.query;
       const paramQuerySQL = {};
 
       const size = 5;
@@ -18,6 +18,18 @@ class DoctorController {
       if (search) {
         paramQuerySQL.where = { nama: { [Op.iLike]: `%${search}%` } };
       }
+
+      //search
+      if (category) {
+        paramQuerySQL.where = { spesialis: { [Op.eq]: category } };
+      }
+
+      if (sort && sort === "experience") {
+        paramQuerySQL.order = [["experience", "DESC"]];
+      } else {
+        paramQuerySQL.order = [["nama", "ASC"]];
+      }
+
       let doctors = await Doctor.findAndCountAll(paramQuerySQL);
 
       res.status(200).json({
@@ -40,7 +52,7 @@ class DoctorController {
         error.status = 404;
         return next(error);
       }
-      
+
       const dataResponse = {
         id: doctor.id,
         nama: doctor.nama,
@@ -59,7 +71,7 @@ class DoctorController {
           return schedule;
         }),
       };
-    
+
       res.status(200).json({
         status: 200,
         message: `Successfully retrieve doctor with id ${id}`,

@@ -13,9 +13,9 @@ const mockNext = jest.fn();
 
 describe("DoctorController", () => {
   describe("GetAllDoctors", () => {
-    it("should return doctors with pagination and search", async () => {
+    it("should return doctors with pagination and search and category and sort", async () => {
       const req = {
-        query: { page: 1, search: "John" },
+        query: { page: 1, search: "John", category: 'Sp. Jiwa', sort: 'experience' },
       };
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       const next = mockNext;
