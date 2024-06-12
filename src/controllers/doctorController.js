@@ -14,14 +14,17 @@ class DoctorController {
       paramQuerySQL.limit = size;
       paramQuerySQL.offset = skip;
 
-      //search
+      // Initialize where clause
+      paramQuerySQL.where = {};
+
+      // Add search condition if present
       if (search) {
-        paramQuerySQL.where = { nama: { [Op.iLike]: `%${search}%` } };
+        paramQuerySQL.where.nama = { [Op.iLike]: `%${search}%` };
       }
 
-      //search
+      // Add category condition if present
       if (category) {
-        paramQuerySQL.where = { spesialis: { [Op.eq]: category } };
+        paramQuerySQL.where.spesialis = { [Op.eq]: category };
       }
 
       if (sort && sort === "experience") {
