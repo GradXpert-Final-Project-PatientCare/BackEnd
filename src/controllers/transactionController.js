@@ -8,6 +8,7 @@ const {
 } = require("../models");
 const { Op } = require("sequelize");
 const midtransClient = require("midtrans-client");
+require('dotenv').config()
 
 class TransactionController {
   static async CreateTransaction(req, res, next) {
@@ -80,7 +81,7 @@ class TransactionController {
 
         let snap = new midtransClient.Snap({
           isProduction: false,
-          serverKey: "SB-Mid-server-L1ZpgtLTCpL3AM-hDbvF1rUJ",
+          serverKey: process.env.MIDTRANS_KEY,
         });
 
         let parameter = {
